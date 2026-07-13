@@ -6,10 +6,10 @@ exports.handler = async (event) => {
   try {
     const { passcode, original, subject, area, tone, limit } = JSON.parse(event.body);
 
-    const SITE_PASSWORD = process.env.SITE_PASSWORD;
+    const SITE_PASSWORD = '16543';
     const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
-    if (!SITE_PASSWORD || passcode !== SITE_PASSWORD) {
+    if (passcode !== SITE_PASSWORD) {
       return {
         statusCode: 401,
         headers: { 'Content-Type': 'application/json' },
