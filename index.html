@@ -6,7 +6,23 @@
 <title>자유학기 성적통지표 변환기</title>
 <script src="https://js.puter.com/v2/"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic+Coding&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: 'NanumSquareRound';
+    src: url('https://cdn.jsdelivr.net/gh/loplat/NanumSquareRound/NanumSquareRoundR.woff2') format('woff2');
+    font-weight: 400;
+  }
+  @font-face {
+    font-family: 'NanumSquareRound';
+    src: url('https://cdn.jsdelivr.net/gh/loplat/NanumSquareRound/NanumSquareRoundB.woff2') format('woff2');
+    font-weight: 700;
+  }
+  @font-face {
+    font-family: 'NanumSquareRound';
+    src: url('https://cdn.jsdelivr.net/gh/loplat/NanumSquareRound/NanumSquareRoundEB.woff2') format('woff2');
+    font-weight: 800;
+  }
+</style>
 <style>
   :root{
     --bg:       #F7F4FF;
@@ -37,7 +53,7 @@
   body{
     background:var(--bg);
     color:var(--ink);
-    font-family:'Jua', 'Apple SD Gothic Neo', sans-serif;
+    font-family:'NanumSquareRound', 'Apple SD Gothic Neo', sans-serif;
     min-height:100vh;
   }
 
@@ -58,15 +74,15 @@
     position:absolute;bottom:-14px;right:40px;transform:rotate(10deg);
   }
   .site-header .eyebrow{
-    font-size:12px;letter-spacing:0.14em;
-    color:#9080C8;text-transform:uppercase;margin-bottom:10px;
+    font-size:13px;letter-spacing:0.14em;
+    color:#9080C8;text-transform:uppercase;margin-bottom:12px;
   }
   .site-header h1{
-    font-size:30px;font-weight:400;
-    color:var(--ink);letter-spacing:-0.01em;margin-bottom:10px;
+    font-size:34px;font-weight:800;
+    color:var(--ink);letter-spacing:-0.01em;margin-bottom:12px;
   }
   .site-header p{
-    font-size:14px;color:var(--ink-soft);line-height:1.8;
+    font-size:16px;color:var(--ink-soft);line-height:1.9;
   }
 
   .wrap{max-width:900px;margin:0 auto;padding:28px 20px 0;}
@@ -88,8 +104,8 @@
     font-size:16px;font-weight:400;flex-shrink:0;
     background:rgba(255,255,255,0.3);color:#fff;
   }
-  .section-header h2{font-size:17px;color:#fff;margin-bottom:2px;}
-  .section-header p{font-size:12.5px;color:rgba(255,255,255,0.8);}
+  .section-header h2{font-size:19px;color:#fff;margin-bottom:3px;}
+  .section-header p{font-size:14px;color:rgba(255,255,255,0.85);}
   .section-body{background:var(--card);padding:24px;}
 
   /* 민트 헤더 */
@@ -113,9 +129,9 @@
   .upload-zone.has-file{border-color:var(--green);background:var(--green-bg);border-style:solid;}
   .upload-zone input[type=file]{display:none;}
   .upload-icon{font-size:34px;margin-bottom:8px;}
-  .upload-zone h3{font-size:15px;color:var(--mint);margin-bottom:4px;}
+  .upload-zone h3{font-size:17px;color:var(--mint);margin-bottom:6px;}
   .upload-zone h3.done{color:var(--green);}
-  .upload-zone p{font-size:12.5px;color:var(--ink-soft);}
+  .upload-zone p{font-size:14px;color:var(--ink-soft);}
 
   /* ── 미리보기 ── */
   .preview-wrap{
@@ -130,13 +146,13 @@
   .preview-head span{font-size:13px;color:var(--mint);}
   .preview-head em{font-size:12px;color:var(--ink-soft);font-style:normal;}
   .table-scroll{overflow-x:auto;max-height:240px;overflow-y:auto;}
-  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  table{width:100%;border-collapse:collapse;font-size:14px;}
   th{
-    background:var(--mint-bg);padding:8px 12px;text-align:left;
-    font-weight:400;border-bottom:1.5px solid var(--mint-mid);
+    background:var(--mint-bg);padding:9px 13px;text-align:left;
+    font-weight:700;border-bottom:1.5px solid var(--mint-mid);
     white-space:nowrap;color:var(--mint);position:sticky;top:0;
   }
-  td{padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.7;}
+  td{padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.7;}
   td.special{max-width:360px;}
   tr:last-child td{border-bottom:none;}
 
@@ -181,13 +197,13 @@
   textarea{
     flex:1;border:none;outline:none;resize:none;
     padding:14px 16px;font-family:'Jua','Apple SD Gothic Neo',sans-serif;
-    font-size:14px;line-height:1.9;color:var(--ink);
+    font-size:15.5px;line-height:1.95;color:var(--ink);
     background:var(--card);
   }
   textarea::placeholder{color:var(--ink-faint);}
 
   .output-body{
-    flex:1;padding:14px 16px;font-size:14px;line-height:1.9;
+    flex:1;padding:14px 16px;font-size:15.5px;line-height:1.95;
     overflow-y:auto;white-space:pre-wrap;background:var(--card);
   }
   .output-empty{
@@ -214,7 +230,7 @@
 
   button.btn-mint{
     background:var(--mint-btn);color:#fff;border:none;
-    padding:11px 26px;border-radius:99px;font-size:14px;
+    padding:13px 28px;border-radius:99px;font-size:15px;
     cursor:pointer;transition:background .15s,transform .1s;
     display:flex;align-items:center;gap:7px;
     box-shadow:0 3px 10px rgba(59,191,160,0.35);
@@ -225,7 +241,7 @@
 
   button.btn-rose{
     background:var(--rose-btn);color:#fff;border:none;
-    padding:11px 26px;border-radius:99px;font-size:14px;
+    padding:13px 28px;border-radius:99px;font-size:15px;
     cursor:pointer;transition:background .15s,transform .1s;
     display:flex;align-items:center;gap:7px;
     box-shadow:0 3px 10px rgba(199,107,186,0.35);
@@ -236,7 +252,7 @@
 
   button.btn-green{
     background:var(--green);color:#fff;border:none;
-    padding:11px 26px;border-radius:99px;font-size:14px;
+    padding:13px 28px;border-radius:99px;font-size:15px;
     cursor:pointer;transition:background .15s,transform .1s;
     display:flex;align-items:center;gap:7px;
     box-shadow:0 3px 10px rgba(59,170,114,0.35);
@@ -299,6 +315,10 @@
       </div>
     </div>
     <div class="section-body">
+
+      <div style="background:#FFF8E1;border:1.5px solid #FFD54F;border-radius:12px;padding:12px 18px;margin-bottom:14px;font-size:15px;color:#7A5C00;display:flex;align-items:center;gap:10px;">
+        ⚠️ <span>업로드 전, 엑셀 파일에서 <strong>학생 이름을 삭제</strong>하고 올려주세요. (개인정보 보호)</span>
+      </div>
 
       <div class="upload-zone" id="uploadZone">
         <input type="file" id="fileInput" accept=".xlsx,.xls">
