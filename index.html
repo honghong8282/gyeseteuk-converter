@@ -426,7 +426,7 @@ async function convertText(original){
     '1. 종결어미 변환: ~함. ~임. ~음. ~됨. ~였음. 등을 ~합니다. ~입니다. ~습니다. ~됩니다. ~였습니다. 로 변경\n'+
     '2. 띄어쓰기 오류와 명백한 오타 수정\n\n'+
     '[원문]\n'+original;
-  const resp=await puter.ai.chat(prompt,{model:'claude-sonnet-4-6'});
+  const resp=await puter.ai.chat(prompt);
   let r='';
   if(typeof resp==='string') r=resp.trim();
   else if(resp&&resp.message){const c=resp.message.content;r=(typeof c==='string'?c:(c[0]&&c[0].text)||'').trim();}
