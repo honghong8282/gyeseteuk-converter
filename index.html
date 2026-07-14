@@ -321,10 +321,10 @@
       </div>
 
       <div class="upload-zone" id="uploadZone">
-        <input type="file" id="fileInput" accept=".xlsx,.xls">
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.cell,.hcell,.ods">
         <div class="upload-icon">🗂️</div>
         <h3 id="uploadTitle">엑셀 파일을 여기에 드래그하거나 클릭해서 올려주세요</h3>
-        <p id="uploadDesc">.xlsx 형식 지원 · 나이스 자유학기 통지표 양식</p>
+        <p id="uploadDesc">엑셀(.xlsx/.xls) · 한셀(.cell/.hcell) 지원 · 나이스 자유학기 통지표 양식</p>
       </div>
 
       <div class="preview-wrap" id="previewWrap">
@@ -446,11 +446,16 @@ uploadZone.addEventListener('click',()=>fileInput.click());
 fileInput.addEventListener('change',e=>{if(e.target.files[0])handleFile(e.target.files[0]);});
 
 function handleFile(file){
-  if(!file.name.match(/\.(xlsx|xls)$/i)){showToast('xlsx 파일만 지원해요!');return;}
+  if(!file.name.match(/\.(xlsx|xls|cell|hcell|ods)$/i)){showToast('xlsx, xls, cell, hcell, ods 파일만 지원해요!');return;}
   const reader=new FileReader();
   reader.onload=e=>{
-    try{wb=XLSX.read(e.target.result,{type:'array',cellStyles:true});parseSheet();}
-    catch(err){showToast('파일을 읽을 수 없어요: '+err.message);}
+    try{
+      wb=XLSX.read(e.target.result,{type:'array',cellStyles:true,dense:false});
+      parseSheet();
+    }catch(err){
+      showToast('파일을 읽을 수 없어요. 한셀이라면 다른이름으로저장 → xlsx로 저장 후 시도해보세요.');
+      console.error(err);
+    }
   };
   reader.readAsArrayBuffer(file);
   const t=document.getElementById('uploadTitle');
@@ -522,7 +527,8 @@ document.getElementById('convertBatchBtn').addEventListener('click',async()=>{
 });
 
 document.getElementById('downloadBtn').addEventListener('click',()=>{
-  XLSX.writeFile(wb,'자유학기_통지표_변환완료.xlsx');showToast('다운로드 시작! 🎊');
+  const ext = fileInput.files[0]?.name.match(/\.(cell|hcell|ods)$/i) ? 'xlsx' : 'xlsx';
+  XLSX.writeFile(wb,'자유학기_통지표_변환완료.'+ext);showToast('다운로드 시작! 🎊');
 });
 
 document.getElementById('resetBtn').addEventListener('click',()=>{
