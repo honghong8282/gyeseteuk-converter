@@ -196,7 +196,7 @@
 
   textarea{
     flex:1;border:none;outline:none;resize:none;
-    padding:14px 16px;font-family:'Jua','Apple SD Gothic Neo',sans-serif;
+    padding:14px 16px;font-family:'NanumSquareRound','Apple SD Gothic Neo',sans-serif;
     font-size:15.5px;line-height:1.95;color:var(--ink);
     background:var(--card);
   }
@@ -226,7 +226,7 @@
   .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
   .actions.center{justify-content:center;}
 
-  button{font-family:'Jua','Apple SD Gothic Neo',sans-serif;}
+  button{font-family:'NanumSquareRound','Apple SD Gothic Neo',sans-serif;}
 
   button.btn-mint{
     background:var(--mint-btn);color:#fff;border:none;
@@ -450,7 +450,7 @@ function handleFile(file){
   const reader=new FileReader();
   reader.onload=e=>{
     try{
-      wb=XLSX.read(e.target.result,{type:'array',cellStyles:true,dense:false});
+      wb=XLSX.read(e.target.result,{type:'array',cellStyles:true});
       parseSheet();
     }catch(err){
       showToast('파일을 읽을 수 없어요. 한셀이라면 다른이름으로저장 → xlsx로 저장 후 시도해보세요.');
