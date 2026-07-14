@@ -3,468 +3,572 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>자유학기 통지표 특기사항 변환기</title>
+<title>자유학기 성적통지표 변환기</title>
 <script src="https://js.puter.com/v2/"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
   :root{
-    --paper:#EEF1F6;
+    --paper:#F2F4F8;
     --card:#FFFFFF;
-    --ink:#232B3D;
-    --ink-soft:#5B6478;
-    --ink-faint:#8A93A6;
-    --line:rgba(35,43,61,0.12);
-    --line-strong:rgba(35,43,61,0.22);
-    --stamp:#B33A3A;
-    --stamp-soft:#F6E4E2;
-    --green:#2D6A2D;
-    --green-soft:#E8F5E8;
+    --ink:#1A2236;
+    --ink-soft:#4A5568;
+    --ink-faint:#9AA5B4;
+    --line:rgba(26,34,54,0.10);
+    --line-strong:rgba(26,34,54,0.20);
+    /* 배치 섹션 — 파란 계열 */
+    --blue:#1D4ED8;
+    --blue-light:#EFF6FF;
+    --blue-mid:#BFDBFE;
+    /* 단건 섹션 — 자주 계열 */
+    --purple:#6D28D9;
+    --purple-light:#F5F3FF;
+    --purple-mid:#DDD6FE;
+    /* 성공 */
+    --green:#15803D;
+    --green-soft:#F0FDF4;
   }
-  *{box-sizing:border-box;}
+
+  *{box-sizing:border-box;margin:0;padding:0;}
   body{
-    margin:0;
     background:var(--paper);
     color:var(--ink);
     font-family:'Noto Sans KR',sans-serif;
-    padding:40px 20px 80px;
+    min-height:100vh;
   }
-  .wrap{max-width:860px;margin:0 auto;}
 
-  header{text-align:center;margin-bottom:36px;}
-  .eyebrow{
-    font-family:'JetBrains Mono',monospace;
-    font-size:12px;letter-spacing:0.14em;
-    color:var(--stamp);text-transform:uppercase;margin-bottom:10px;
-  }
-  h1{
-    font-family:'Noto Serif KR',serif;font-weight:700;
-    font-size:28px;margin:0 0 10px;letter-spacing:-0.01em;
-  }
-  header p{color:var(--ink-soft);font-size:14px;margin:0;line-height:1.6;}
-
-  /* 업로드 영역 */
-  .upload-zone{
-    background:var(--card);
-    border:2px dashed var(--line-strong);
-    border-radius:16px;
-    padding:48px 24px;
+  /* ── 상단 헤더 ── */
+  .site-header{
+    background:var(--ink);
+    color:#fff;
+    padding:40px 24px 44px;
     text-align:center;
-    cursor:pointer;
-    transition:border-color .2s, background .2s;
-    margin-bottom:24px;
+    position:relative;
+    overflow:hidden;
   }
-  .upload-zone:hover, .upload-zone.drag-over{
-    border-color:var(--ink);background:#f5f7fa;
+  .site-header::before{
+    content:'';
+    position:absolute;inset:0;
+    background:radial-gradient(ellipse 80% 60% at 50% 120%, rgba(109,40,217,0.35), transparent);
+    pointer-events:none;
+  }
+  .site-header .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:0.18em;
+    color:rgba(255,255,255,0.45);
+    text-transform:uppercase;margin-bottom:12px;
+  }
+  .site-header h1{
+    font-family:'Noto Serif KR',serif;
+    font-size:30px;font-weight:700;
+    letter-spacing:-0.02em;margin-bottom:10px;
+    position:relative;
+  }
+  .site-header p{
+    font-size:13.5px;color:rgba(255,255,255,0.6);
+    line-height:1.7;position:relative;
+  }
+
+  .wrap{max-width:920px;margin:0 auto;padding:32px 20px 0;}
+
+  /* ── 섹션 공통 ── */
+  .section{
+    border-radius:16px;
+    margin-bottom:20px;
+    overflow:hidden;
+    box-shadow:0 2px 12px rgba(26,34,54,0.07);
+  }
+  .section-header{
+    display:flex;align-items:center;gap:12px;
+    padding:18px 24px;
+  }
+  .section-num{
+    width:32px;height:32px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-size:14px;font-weight:700;flex-shrink:0;
+  }
+  .section-header h2{font-size:16px;font-weight:700;margin:0;}
+  .section-header p{font-size:12.5px;margin:0;opacity:0.75;}
+  .section-body{
+    background:var(--card);
+    padding:24px;
+  }
+
+  /* 배치 섹션 색상 */
+  .section.batch .section-header{background:var(--blue);color:#fff;}
+  .section.batch .section-num{background:rgba(255,255,255,0.2);color:#fff;}
+
+  /* 단건 섹션 색상 */
+  .section.single .section-header{background:var(--purple);color:#fff;}
+  .section.single .section-num{background:rgba(255,255,255,0.2);color:#fff;}
+
+  /* ── 업로드 영역 ── */
+  .upload-zone{
+    border:2px dashed var(--blue-mid);
+    border-radius:12px;padding:32px 20px;
+    text-align:center;cursor:pointer;
+    background:var(--blue-light);
+    transition:border-color .2s,background .2s;
+  }
+  .upload-zone:hover,.upload-zone.drag-over{
+    border-color:var(--blue);background:#DBEAFE;
   }
   .upload-zone.has-file{
-    border-color:var(--green);background:var(--green-soft);
-    border-style:solid;
+    border-color:var(--green);background:var(--green-soft);border-style:solid;
   }
-  .upload-icon{font-size:40px;margin-bottom:12px;}
-  .upload-zone h2{font-size:16px;font-weight:700;margin:0 0 6px;}
-  .upload-zone p{font-size:13px;color:var(--ink-soft);margin:0;}
   .upload-zone input[type=file]{display:none;}
+  .upload-icon{font-size:32px;margin-bottom:8px;}
+  .upload-zone h3{font-size:15px;font-weight:700;margin-bottom:4px;color:var(--blue);}
+  .upload-zone h3.done{color:var(--green);}
+  .upload-zone p{font-size:12.5px;color:var(--ink-soft);}
 
-  /* 미리보기 테이블 */
+  /* ── 미리보기 테이블 ── */
   .preview-wrap{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:12px;
-    overflow:hidden;
-    margin-bottom:24px;
-    display:none;
+    border:1px solid var(--blue-mid);border-radius:10px;
+    overflow:hidden;margin-top:16px;display:none;
   }
   .preview-head{
     display:flex;justify-content:space-between;align-items:center;
-    padding:14px 18px;border-bottom:1px solid var(--line);
+    padding:10px 14px;background:var(--blue-light);
+    border-bottom:1px solid var(--blue-mid);
   }
-  .preview-head h3{font-size:13px;font-weight:700;margin:0;}
-  .preview-head span{font-size:12px;color:var(--ink-soft);}
-  .table-scroll{overflow-x:auto;}
-  table{width:100%;border-collapse:collapse;font-size:13px;}
+  .preview-head span{font-size:12.5px;font-weight:700;color:var(--blue);}
+  .preview-head em{font-size:12px;color:var(--ink-soft);font-style:normal;}
+  .table-scroll{overflow-x:auto;max-height:260px;overflow-y:auto;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
   th{
-    background:#f5f7fa;padding:10px 12px;
-    text-align:left;font-weight:600;
-    border-bottom:1px solid var(--line);
-    white-space:nowrap;color:var(--ink-soft);
+    background:#EFF6FF;padding:8px 12px;text-align:left;
+    font-weight:700;border-bottom:1px solid var(--blue-mid);
+    white-space:nowrap;color:var(--blue);position:sticky;top:0;
   }
-  td{
-    padding:10px 12px;border-bottom:1px solid var(--line);
-    vertical-align:top;line-height:1.6;
-  }
-  td.special{max-width:320px;}
-  td.converted{color:var(--green);font-weight:500;}
+  td{padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.6;}
+  td.special{max-width:360px;}
   tr:last-child td{border-bottom:none;}
-  .badge{
-    display:inline-block;font-size:11px;padding:2px 8px;
-    border-radius:20px;font-weight:600;margin-left:6px;
-  }
+
+  .badge{display:inline-block;font-size:11px;padding:2px 9px;border-radius:20px;font-weight:700;}
   .badge.done{background:var(--green-soft);color:var(--green);}
-  .badge.waiting{background:#f5f7fa;color:var(--ink-faint);}
-  .badge.processing{background:#FFF3CD;color:#856404;}
+  .badge.waiting{background:#F1F5F9;color:var(--ink-faint);}
+  .badge.processing{background:#FEF9C3;color:#854D0E;}
 
-  /* 진행 상태 */
+  /* ── 진행 바 ── */
   .progress-wrap{
-    background:var(--card);border:1px solid var(--line);
-    border-radius:12px;padding:20px 24px;
-    margin-bottom:24px;display:none;
+    margin-top:16px;background:var(--blue-light);
+    border:1px solid var(--blue-mid);
+    border-radius:10px;padding:16px 18px;display:none;
   }
-  .progress-label{
-    display:flex;justify-content:space-between;
-    font-size:13px;font-weight:600;margin-bottom:10px;
-  }
-  .progress-bar-bg{
-    background:#e8eaf0;border-radius:99px;height:8px;overflow:hidden;
-  }
-  .progress-bar{
-    background:var(--ink);height:100%;border-radius:99px;
-    width:0%;transition:width .3s ease;
-  }
-  .progress-status{font-size:12px;color:var(--ink-soft);margin-top:8px;}
+  .progress-label{display:flex;justify-content:space-between;
+    font-size:13px;font-weight:700;margin-bottom:8px;color:var(--blue);}
+  .progress-bar-bg{background:var(--blue-mid);border-radius:99px;height:8px;overflow:hidden;}
+  .progress-bar{background:var(--blue);height:100%;border-radius:99px;width:0%;transition:width .3s;}
+  .progress-status{font-size:12px;color:var(--ink-soft);margin-top:7px;}
 
-  /* 버튼 */
-  .actions{display:flex;gap:12px;justify-content:center;margin-top:8px;}
-  button.primary{
-    font-family:'Noto Sans KR',sans-serif;
-    background:var(--ink);color:#fff;border:none;
-    padding:13px 32px;border-radius:10px;font-size:14.5px;
-    font-weight:500;cursor:pointer;
-    transition:background .15s,transform .1s;
-    display:flex;align-items:center;gap:8px;
+  /* ── 단건 변환 패널 ── */
+  .single-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:680px){.single-grid{grid-template-columns:1fr;}}
+
+  .panel{
+    border:1px solid var(--line-strong);border-radius:12px;
+    display:flex;flex-direction:column;min-height:300px;
+    position:relative;overflow:hidden;
   }
-  button.primary:hover{background:#374056;}
-  button.primary:active{transform:scale(0.98);}
-  button.primary:disabled{background:var(--ink-faint);cursor:default;}
-  button.primary.green{background:var(--green);}
-  button.primary.green:hover{background:#235023;}
+  .panel-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:11px 14px;border-bottom:1px solid var(--line);
+  }
+  .panel-head.left-head{background:var(--purple-light);}
+  .panel-head.right-head{background:#FFF7ED;}
+  .panel-title{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;color:var(--ink-soft);}
+  .dot{width:7px;height:7px;border-radius:50%;}
+  .dot.input{background:var(--purple);}
+  .dot.output{background:#EA580C;}
+  .charcount{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint);}
+
+  textarea{
+    flex:1;border:none;outline:none;resize:none;
+    padding:14px 16px;font-family:'Noto Sans KR',sans-serif;
+    font-size:14px;line-height:1.85;color:var(--ink);
+    background:repeating-linear-gradient(var(--card),var(--card) 30px,rgba(109,40,217,0.06) 31px);
+    background-attachment:local;
+  }
+  textarea::placeholder{color:var(--ink-faint);}
+
+  .output-body{
+    flex:1;padding:14px 16px;font-size:14px;line-height:1.85;
+    overflow-y:auto;white-space:pre-wrap;
+    background:repeating-linear-gradient(var(--card),var(--card) 30px,rgba(234,88,12,0.06) 31px);
+  }
+  .output-empty{
+    color:var(--ink-faint);font-size:13px;
+    display:flex;align-items:center;justify-content:center;
+    height:100%;text-align:center;padding:20px;line-height:1.7;
+    background:transparent;
+  }
+  .stamp-mark{
+    position:absolute;top:12px;right:12px;
+    width:48px;height:48px;border:2.5px solid #EA580C;
+    border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-family:'Noto Serif KR',serif;font-weight:700;font-size:10.5px;
+    color:#EA580C;transform:scale(0) rotate(-18deg);opacity:0;
+    transition:transform .45s cubic-bezier(.34,1.56,.64,1),opacity .3s;
+    background:#FFF7ED;line-height:1.3;text-align:center;pointer-events:none;
+  }
+  .stamp-mark.show{transform:scale(1) rotate(-12deg);opacity:1;}
+
+  /* ── 공통 버튼 ── */
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+  .actions.center{justify-content:center;}
+
+  button.btn-blue{
+    font-family:'Noto Sans KR',sans-serif;
+    background:var(--blue);color:#fff;border:none;
+    padding:11px 26px;border-radius:9px;font-size:14px;font-weight:600;
+    cursor:pointer;transition:background .15s,transform .1s;
+    display:flex;align-items:center;gap:7px;
+  }
+  button.btn-blue:hover{background:#1E40AF;}
+  button.btn-blue:active{transform:scale(0.98);}
+  button.btn-blue:disabled{background:#93C5FD;cursor:default;}
+
+  button.btn-purple{
+    font-family:'Noto Sans KR',sans-serif;
+    background:var(--purple);color:#fff;border:none;
+    padding:11px 26px;border-radius:9px;font-size:14px;font-weight:600;
+    cursor:pointer;transition:background .15s,transform .1s;
+    display:flex;align-items:center;gap:7px;
+  }
+  button.btn-purple:hover{background:#5B21B6;}
+  button.btn-purple:active{transform:scale(0.98);}
+  button.btn-purple:disabled{background:#C4B5FD;cursor:default;}
+
+  button.btn-green{
+    font-family:'Noto Sans KR',sans-serif;
+    background:var(--green);color:#fff;border:none;
+    padding:11px 26px;border-radius:9px;font-size:14px;font-weight:600;
+    cursor:pointer;transition:background .15s,transform .1s;
+    display:flex;align-items:center;gap:7px;
+  }
+  button.btn-green:hover{background:#166534;}
+
   button.ghost{
     font-family:'Noto Sans KR',sans-serif;
     background:transparent;color:var(--ink-soft);
     border:1px solid var(--line-strong);
-    padding:13px 20px;border-radius:10px;font-size:14px;
-    font-weight:500;cursor:pointer;
+    padding:11px 18px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
   }
-  button.ghost:hover{background:rgba(35,43,61,0.04);}
+  button.ghost:hover{background:rgba(26,34,54,0.04);}
 
   .spinner{
-    width:14px;height:14px;
+    width:13px;height:13px;
     border:2px solid rgba(255,255,255,0.35);
     border-top-color:#fff;border-radius:50%;
     animation:spin .7s linear infinite;
   }
   @keyframes spin{to{transform:rotate(360deg);}}
 
-  .notice{
-    max-width:640px;margin:32px auto 0;
-    font-size:12px;color:var(--ink-soft);
-    line-height:1.75;text-align:center;
-    padding:14px 20px;border-top:1px solid var(--line);
+  /* ── 푸터 ── */
+  footer{
+    margin-top:48px;padding:24px 0 36px;
+    text-align:center;border-top:1px solid var(--line);
   }
-  .notice b{color:var(--ink);}
+  footer p{
+    font-family:'Noto Serif KR',serif;
+    font-size:13px;color:var(--ink-faint);letter-spacing:0.05em;
+  }
+  footer strong{color:var(--ink-soft);}
 
   .toast{
     position:fixed;bottom:28px;left:50%;
     transform:translateX(-50%) translateY(20px);
     background:var(--ink);color:#fff;
-    padding:11px 20px;border-radius:9px;
+    padding:10px 20px;border-radius:9px;
     font-size:13px;opacity:0;pointer-events:none;
-    transition:opacity .25s,transform .25s;
+    transition:opacity .25s,transform .25s;z-index:999;
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
+
+<!-- 헤더 -->
+<div class="site-header">
+  <div class="eyebrow">Maetan Middle School · Free Semester</div>
+  <h1>자유학기 성적통지표 변환기</h1>
+  <p>생활기록부 문체(~함. ~임.)를 통지표 문체(~합니다. ~입니다.)로 변환<br>띄어쓰기·오타 자동 수정</p>
+</div>
+
 <div class="wrap">
 
-  <header>
-    <div class="eyebrow">자유학기 통지표</div>
-    <h1>특기사항 일괄 변환기</h1>
-    <p>나이스 엑셀 양식을 업로드하면 특기사항을 자유학기 통지표 문체로 일괄 변환합니다.<br>
-    ~함. ~임. → ~합니다. ~입니다. 변환 + 띄어쓰기·오타 수정</p>
-  </header>
-
-  <!-- 업로드 -->
-  <div class="upload-zone" id="uploadZone">
-    <input type="file" id="fileInput" accept=".xlsx,.xls">
-    <div class="upload-icon">📂</div>
-    <h2 id="uploadTitle">엑셀 파일을 여기에 드래그하거나 클릭하여 업로드</h2>
-    <p id="uploadDesc">.xlsx 형식 지원 · 나이스 자유학기 통지표 양식</p>
-  </div>
-
-  <!-- 미리보기 -->
-  <div class="preview-wrap" id="previewWrap">
-    <div class="preview-head">
-      <h3>불러온 데이터</h3>
-      <span id="rowCount"></span>
+  <!-- ══════════════════════════════════
+       섹션 1 : 엑셀 일괄 변환 (파란색)
+  ══════════════════════════════════ -->
+  <div class="section batch">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>엑셀 일괄 변환</h2>
+        <p>나이스 통지표 양식 업로드 → 특기사항 전체 변환 → 다운로드</p>
+      </div>
     </div>
-    <div class="table-scroll">
-      <table id="previewTable">
-        <thead id="previewHead"></thead>
-        <tbody id="previewBody"></tbody>
-      </table>
+    <div class="section-body">
+
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept=".xlsx,.xls">
+        <div class="upload-icon">📂</div>
+        <h3 id="uploadTitle">엑셀 파일을 여기에 드래그하거나 클릭하여 업로드</h3>
+        <p id="uploadDesc">.xlsx 형식 지원 · 나이스 자유학기 통지표 양식</p>
+      </div>
+
+      <div class="preview-wrap" id="previewWrap">
+        <div class="preview-head">
+          <span>불러온 데이터</span>
+          <em id="rowCount"></em>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead id="previewHead"></thead>
+            <tbody id="previewBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-label">
+          <span>변환 진행 중</span>
+          <span id="progressText">0 / 0</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar" id="progressBar"></div></div>
+        <div class="progress-status" id="progressStatus"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-blue" id="convertBatchBtn" style="display:none" disabled>
+          <span id="batchIcon">→</span>
+          <span id="batchLabel">변환 시작</span>
+        </button>
+        <button class="btn-green" id="downloadBtn" style="display:none">⬇ 변환 파일 다운로드</button>
+        <button class="ghost" id="resetBtn" style="display:none">다시 업로드</button>
+      </div>
+
     </div>
   </div>
 
-  <!-- 진행 상태 -->
-  <div class="progress-wrap" id="progressWrap">
-    <div class="progress-label">
-      <span>변환 진행 중...</span>
-      <span id="progressText">0 / 0</span>
+  <!-- ══════════════════════════════════
+       섹션 2 : 단건 직접 변환 (보라색)
+  ══════════════════════════════════ -->
+  <div class="section single">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>단건 직접 변환</h2>
+        <p>원문을 직접 입력하고 한 건씩 변환</p>
+      </div>
     </div>
-    <div class="progress-bar-bg">
-      <div class="progress-bar" id="progressBar"></div>
+    <div class="section-body">
+
+      <div class="single-grid">
+        <div class="panel">
+          <div class="panel-head left-head">
+            <div class="panel-title"><span class="dot input"></span>과세특 원문 입력</div>
+            <div class="charcount" id="inCount">0자</div>
+          </div>
+          <textarea id="inputText" placeholder="예) 색채 대비를 활용한 정물화 제작 과정에서 창의적인 구도를 계획하고 완성도 높게 표현함. 모둠 활동에서 재료 준비와 정리를 주도적으로 수행하며 협업 능력을 보임."></textarea>
+        </div>
+        <div class="panel">
+          <div class="panel-head right-head">
+            <div class="panel-title"><span class="dot output"></span>자유학기 통지표 결과</div>
+            <div class="charcount" id="outCount">0자</div>
+          </div>
+          <div class="stamp-mark" id="stamp">변환<br>완료</div>
+          <div class="output-body" id="outputBody">
+            <div class="output-empty">왼쪽에 원문을 입력하고<br>'변환하기'를 누르세요.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions center">
+        <button class="btn-purple" id="convertSingleBtn">
+          <span id="singleIcon">→</span>
+          <span id="singleLabel">변환하기</span>
+        </button>
+        <button class="ghost" id="copyBtn">복사하기</button>
+      </div>
+
     </div>
-    <div class="progress-status" id="progressStatus">Puter에 로그인 후 시작됩니다...</div>
   </div>
 
-  <!-- 버튼 -->
-  <div class="actions">
-    <button class="primary" id="convertBtn" style="display:none" disabled>
-      <span id="btnIcon">→</span>
-      <span id="btnLabel">변환 시작</span>
-    </button>
-    <button class="primary green" id="downloadBtn" style="display:none">
-      ⬇ 변환 파일 다운로드
-    </button>
-    <button class="ghost" id="resetBtn" style="display:none">다시 업로드</button>
-  </div>
-
-  <div class="notice">
-    <b>안내</b> · 처음 사용 시 Puter 무료 계정 로그인 창이 뜹니다. · 학년도·학기·학년·반·번호·성명 등 고정 컬럼은 수정하지 않습니다. · 특기사항 컬럼만 변환됩니다.
-  </div>
-
+  <!-- 푸터 -->
+  <footer>
+    <p>Design by <strong>홍홍</strong></p>
+  </footer>
 </div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-let workbook = null;
-let dataRows = [];
-let headerRowIndex = -1;
-let specialCol = -1;
-let convertedWB = null;
+/* ── 공통 유틸 ── */
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+async function convertText(original){
+  const prompt=
+    '다음은 학교 생활기록부 과세특 문구입니다.\n'+
+    '두 가지만 수행하고 변환된 텍스트만 출력하세요. 설명 금지.\n\n'+
+    '1. 종결어미 변환: ~함. ~임. ~음. ~됨. ~였음. 등을 ~합니다. ~입니다. ~습니다. ~됩니다. ~였습니다. 로 변경\n'+
+    '2. 띄어쓰기 오류와 명백한 오타 수정\n\n'+
+    '[원문]\n'+original;
+  const resp=await puter.ai.chat(prompt,{model:'claude-sonnet-4-6'});
+  let r='';
+  if(typeof resp==='string') r=resp.trim();
+  else if(resp&&resp.message){const c=resp.message.content;r=(typeof c==='string'?c:(c[0]&&c[0].text)||'').trim();}
+  else if(resp&&resp.content){const c=resp.content;r=(typeof c==='string'?c:(c[0]&&c[0].text)||'').trim();}
+  return r||original;
+}
 
-const uploadZone = document.getElementById('uploadZone');
-const fileInput = document.getElementById('fileInput');
-const previewWrap = document.getElementById('previewWrap');
-const previewHead = document.getElementById('previewHead');
-const previewBody = document.getElementById('previewBody');
-const rowCount = document.getElementById('rowCount');
-const progressWrap = document.getElementById('progressWrap');
-const progressBar = document.getElementById('progressBar');
-const progressText = document.getElementById('progressText');
-const progressStatus = document.getElementById('progressStatus');
-const convertBtn = document.getElementById('convertBtn');
-const downloadBtn = document.getElementById('downloadBtn');
-const resetBtn = document.getElementById('resetBtn');
-const toast = document.getElementById('toast');
+/* ── 섹션 1: 엑셀 일괄 ── */
+let wb=null,dataRows=[],hRow=-1,sCol=-1;
 
-// 드래그 앤 드롭
-uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
-uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
-uploadZone.addEventListener('drop', e => {
-  e.preventDefault();
-  uploadZone.classList.remove('drag-over');
-  const file = e.dataTransfer.files[0];
-  if(file) handleFile(file);
-});
-uploadZone.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', e => { if(e.target.files[0]) handleFile(e.target.files[0]); });
+const uploadZone=document.getElementById('uploadZone');
+const fileInput=document.getElementById('fileInput');
 
-function handleFile(file) {
-  if(!file.name.match(/\.(xlsx|xls)$/i)){
-    showToast('xlsx 또는 xls 파일만 지원합니다.');
-    return;
-  }
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      workbook = XLSX.read(e.target.result, {type:'array', cellStyles:true});
-      parseSheet();
-    } catch(err) {
-      showToast('파일을 읽을 수 없습니다: ' + err.message);
-    }
+uploadZone.addEventListener('dragover',e=>{e.preventDefault();uploadZone.classList.add('drag-over');});
+uploadZone.addEventListener('dragleave',()=>uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop',e=>{e.preventDefault();uploadZone.classList.remove('drag-over');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);});
+uploadZone.addEventListener('click',()=>fileInput.click());
+fileInput.addEventListener('change',e=>{if(e.target.files[0])handleFile(e.target.files[0]);});
+
+function handleFile(file){
+  if(!file.name.match(/\.(xlsx|xls)$/i)){showToast('xlsx 또는 xls 파일만 지원합니다.');return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{wb=XLSX.read(e.target.result,{type:'array',cellStyles:true});parseSheet();}
+    catch(err){showToast('파일 읽기 실패: '+err.message);}
   };
   reader.readAsArrayBuffer(file);
-
-  document.getElementById('uploadTitle').textContent = '✅ ' + file.name;
-  document.getElementById('uploadDesc').textContent = '파일이 로드되었습니다.';
+  const t=document.getElementById('uploadTitle');
+  t.textContent='✅ '+file.name; t.className='done';
+  document.getElementById('uploadDesc').textContent='파일이 로드되었습니다.';
   uploadZone.classList.add('has-file');
 }
 
-function parseSheet() {
-  const wsName = workbook.SheetNames[0];
-  const ws = workbook.Sheets[wsName];
-  const range = XLSX.utils.decode_range(ws['!ref']);
-
-  // 특기사항 또는 활동내용 컬럼 찾기
-  const targetNames = ['특기사항', '활동내용', '활동 내용', '세부내용'];
-  headerRowIndex = -1;
-  specialCol = -1;
-  for(let r = range.s.r; r <= range.e.r; r++) {
-    for(let c = range.s.c; c <= range.e.c; c++) {
-      const cell = ws[XLSX.utils.encode_cell({r, c})];
-      if(cell && targetNames.includes(String(cell.v).trim())) {
-        headerRowIndex = r;
-        specialCol = c;
-        break;
-      }
+function parseSheet(){
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  const range=XLSX.utils.decode_range(ws['!ref']);
+  const targets=['특기사항','활동내용','활동 내용','세부내용'];
+  hRow=-1;sCol=-1;
+  for(let r=range.s.r;r<=range.e.r&&hRow===-1;r++)
+    for(let c=range.s.c;c<=range.e.c;c++){
+      const cell=ws[XLSX.utils.encode_cell({r,c})];
+      if(cell&&targets.includes(String(cell.v).trim())){hRow=r;sCol=c;break;}
     }
-    if(headerRowIndex !== -1) break;
+  if(hRow===-1){showToast('"특기사항" 컬럼을 찾을 수 없습니다.');return;}
+  dataRows=[];
+  for(let r=hRow+1;r<=range.e.r;r++){
+    const cell=ws[XLSX.utils.encode_cell({r,c:sCol})];
+    const val=cell?String(cell.v).trim():'';
+    if(val) dataRows.push({_r:r,_text:val});
   }
-
-  if(headerRowIndex === -1) {
-    showToast('"특기사항" 또는 "활동내용" 컬럼을 찾을 수 없습니다. 양식을 확인해주세요.');
-    return;
-  }
-
-  // 데이터 행 읽기 (특기사항 있는 행만)
-  dataRows = [];
-  for(let r = headerRowIndex + 1; r <= range.e.r; r++) {
-    const cell = ws[XLSX.utils.encode_cell({r, c: specialCol})];
-    const val = cell ? String(cell.v).trim() : '';
-    if(val) {
-      dataRows.push({ _rowIndex: r, _text: val });
-    }
-  }
-
-  renderPreview();
-}
-
-function renderPreview() {
-  const tr = document.createElement('tr');
-  tr.innerHTML = '<th>#</th><th>특기사항 원문</th><th>상태</th>';
-  previewHead.innerHTML = '';
-  previewHead.appendChild(tr);
-
-  previewBody.innerHTML = '';
-  dataRows.forEach((row, i) => {
-    const tr = document.createElement('tr');
-    const text = row._text;
-    tr.innerHTML =
-      '<td style="white-space:nowrap">' + (i+1) + '</td>' +
-      '<td class="special">' + escHtml(text.length > 100 ? text.slice(0,100)+'…' : text) + '</td>' +
+  const tr=document.createElement('tr');
+  tr.innerHTML='<th>#</th><th>특기사항 원문</th><th>상태</th>';
+  const ph=document.getElementById('previewHead');ph.innerHTML='';ph.appendChild(tr);
+  const pb=document.getElementById('previewBody');pb.innerHTML='';
+  dataRows.forEach((row,i)=>{
+    const tr=document.createElement('tr');
+    const t=row._text;
+    tr.innerHTML='<td style="white-space:nowrap;color:var(--blue);font-weight:700">'+(i+1)+'</td>'+
+      '<td class="special">'+escHtml(t.length>100?t.slice(0,100)+'…':t)+'</td>'+
       '<td><span class="badge waiting" id="badge_'+i+'">대기</span></td>';
-    tr.id = 'row_' + i;
-    previewBody.appendChild(tr);
+    pb.appendChild(tr);
   });
-
-  rowCount.textContent = '총 ' + dataRows.length + '건';
-  previewWrap.style.display = 'block';
-  convertBtn.style.display = 'flex';
-  convertBtn.disabled = false;
-  resetBtn.style.display = 'flex';
+  document.getElementById('rowCount').textContent='총 '+dataRows.length+'건';
+  document.getElementById('previewWrap').style.display='block';
+  const btn=document.getElementById('convertBatchBtn');
+  btn.style.display='flex';btn.disabled=false;
+  document.getElementById('resetBtn').style.display='flex';
 }
 
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-convertBtn.addEventListener('click', startConvert);
-
-async function startConvert() {
-  convertBtn.disabled = true;
-  convertBtn.querySelector('#btnIcon').outerHTML = '<span class="spinner" id="btnIcon"></span>';
-  document.getElementById('btnLabel').textContent = '변환 중...';
-  progressWrap.style.display = 'block';
-
-  // 원본 workbook 복사
-  const wsName = workbook.SheetNames[0];
-  const ws = workbook.Sheets[wsName];
-
-  let done = 0;
-  const total = dataRows.length;
-
-  for(let i = 0; i < dataRows.length; i++) {
-    const row = dataRows[i];
-    const original = row._text;
-
-    setBadge(i, 'processing', '변환 중');
-    progressText.textContent = (i+1) + ' / ' + total;
-    progressStatus.textContent = (i+1) + '번째 항목 변환 중...';
-
-    try {
-      const converted = await convertText(original);
-      // 워크시트 셀 직접 수정
-      const cellAddr = XLSX.utils.encode_cell({r: row._rowIndex, c: specialCol});
-      if(ws[cellAddr]) {
-        ws[cellAddr].v = converted;
-        ws[cellAddr].w = converted;
-      } else {
-        ws[cellAddr] = {t:'s', v:converted, w:converted};
-      }
-      row._converted = converted;
-      setBadge(i, 'done', '완료');
-      done++;
-    } catch(err) {
-      setBadge(i, 'waiting', '오류');
-      progressStatus.textContent = (i+1) + '번 오류: ' + err.message;
-    }
-
-    progressBar.style.width = Math.round(((i+1)/total)*100) + '%';
-    await new Promise(r => setTimeout(r, 300));
+document.getElementById('convertBatchBtn').addEventListener('click',async()=>{
+  const btn=document.getElementById('convertBatchBtn');
+  btn.disabled=true;
+  document.getElementById('batchIcon').outerHTML='<span class="spinner" id="batchIcon"></span>';
+  document.getElementById('batchLabel').textContent='변환 중...';
+  const pw=document.getElementById('progressWrap');pw.style.display='block';
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  let done=0;
+  for(let i=0;i<dataRows.length;i++){
+    const row=dataRows[i];
+    const b=document.getElementById('badge_'+i);b.className='badge processing';b.textContent='변환 중';
+    document.getElementById('progressText').textContent=(i+1)+' / '+dataRows.length;
+    document.getElementById('progressStatus').textContent=(i+1)+'번째 항목 변환 중...';
+    try{
+      const cv=await convertText(row._text);
+      const addr=XLSX.utils.encode_cell({r:row._r,c:sCol});
+      if(ws[addr]){ws[addr].v=cv;ws[addr].w=cv;}else ws[addr]={t:'s',v:cv,w:cv};
+      b.className='badge done';b.textContent='완료';done++;
+    }catch(err){b.className='badge waiting';b.textContent='오류';}
+    document.getElementById('progressBar').style.width=Math.round(((i+1)/dataRows.length)*100)+'%';
+    await new Promise(r=>setTimeout(r,300));
   }
-
-  progressStatus.textContent = '변환 완료! 총 ' + done + '/' + total + '명 처리됨';
-  document.getElementById('btnIcon').outerHTML = '<span id="btnIcon">✓</span>';
-  document.getElementById('btnLabel').textContent = '변환 완료';
-  downloadBtn.style.display = 'flex';
-  convertedWB = workbook;
-}
-
-function setBadge(i, type, text) {
-  const badge = document.getElementById('badge_' + i);
-  if(badge){ badge.className = 'badge ' + type; badge.textContent = text; }
-}
-
-async function convertText(original) {
-  const prompt =
-    '다음은 학교 생활기록부 과세특 문구입니다.\n' +
-    '두 가지만 수행하고 변환된 텍스트만 출력하세요. 설명 금지.\n\n' +
-    '1. 종결어미 변환: ~함. ~임. ~음. ~됨. ~였음. 등을 ~합니다. ~입니다. ~습니다. ~됩니다. ~였습니다. 로 변경\n' +
-    '2. 띄어쓰기 오류와 명백한 오타 수정\n\n' +
-    '[원문]\n' + original;
-
-  const response = await puter.ai.chat(prompt, { model: 'claude-sonnet-4-6' });
-
-  let result = '';
-  if(typeof response === 'string') result = response.trim();
-  else if(response && response.message) {
-    const c = response.message.content;
-    result = (typeof c === 'string' ? c : (c[0] && c[0].text) || '').trim();
-  } else if(response && response.content) {
-    const c = response.content;
-    result = (typeof c === 'string' ? c : (c[0] && c[0].text) || '').trim();
-  }
-  return result || original;
-}
-
-downloadBtn.addEventListener('click', () => {
-  if(!convertedWB) return;
-  XLSX.writeFile(convertedWB, '자유학기_통지표_변환완료.xlsx');
-  showToast('파일 다운로드 시작!');
+  document.getElementById('progressStatus').textContent='완료! 총 '+done+'/'+dataRows.length+'건 처리됨';
+  document.getElementById('batchIcon').outerHTML='<span id="batchIcon">✓</span>';
+  document.getElementById('batchLabel').textContent='변환 완료';
+  document.getElementById('downloadBtn').style.display='flex';
 });
 
-resetBtn.addEventListener('click', () => {
-  workbook = null; dataRows = []; headerRowIndex = -1; specialCol = -1; convertedWB = null;
-  fileInput.value = '';
+document.getElementById('downloadBtn').addEventListener('click',()=>{
+  XLSX.writeFile(wb,'자유학기_통지표_변환완료.xlsx');showToast('다운로드 시작!');
+});
+
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  wb=null;dataRows=[];hRow=-1;sCol=-1;fileInput.value='';
   uploadZone.classList.remove('has-file');
-  document.getElementById('uploadTitle').textContent = '엑셀 파일을 여기에 드래그하거나 클릭하여 업로드';
-  document.getElementById('uploadDesc').textContent = '.xlsx 형식 지원 · 나이스 자유학기 통지표 양식';
-  previewWrap.style.display = 'none';
-  progressWrap.style.display = 'none';
-  convertBtn.style.display = 'none';
-  downloadBtn.style.display = 'none';
-  resetBtn.style.display = 'none';
-  progressBar.style.width = '0%';
+  const t=document.getElementById('uploadTitle');
+  t.textContent='엑셀 파일을 여기에 드래그하거나 클릭하여 업로드';t.className='';
+  document.getElementById('uploadDesc').textContent='.xlsx 형식 지원 · 나이스 자유학기 통지표 양식';
+  ['previewWrap','progressWrap'].forEach(id=>document.getElementById(id).style.display='none');
+  ['convertBatchBtn','downloadBtn','resetBtn'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('progressBar').style.width='0%';
 });
 
-function showToast(msg) {
-  toast.textContent = msg;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2500);
-}
+/* ── 섹션 2: 단건 변환 ── */
+const inputText=document.getElementById('inputText');
+const outputBody=document.getElementById('outputBody');
+const stamp=document.getElementById('stamp');
+let lastOutput='';
+
+inputText.addEventListener('input',()=>document.getElementById('inCount').textContent=inputText.value.length+'자');
+
+document.getElementById('convertSingleBtn').addEventListener('click',async()=>{
+  const original=inputText.value.trim();
+  if(!original){outputBody.innerHTML='<div class="output-empty">원문을 먼저 입력해주세요.</div>';return;}
+  const btn=document.getElementById('convertSingleBtn');btn.disabled=true;
+  document.getElementById('singleIcon').outerHTML='<span class="spinner" id="singleIcon"></span>';
+  document.getElementById('singleLabel').textContent='변환 중...';
+  stamp.classList.remove('show');
+  outputBody.innerHTML='<div class="output-empty">변환하는 중...</div>';
+  try{
+    const result=await convertText(original);
+    lastOutput=result;outputBody.textContent=result;
+    document.getElementById('outCount').textContent=result.length+'자';
+    stamp.classList.add('show');
+  }catch(err){
+    outputBody.innerHTML='<div class="output-empty">오류: '+escHtml(err.message)+'</div>';
+  }
+  btn.disabled=false;
+  document.getElementById('singleIcon').outerHTML='<span id="singleIcon">→</span>';
+  document.getElementById('singleLabel').textContent='변환하기';
+});
+
+document.getElementById('copyBtn').addEventListener('click',()=>{
+  if(!lastOutput)return;
+  navigator.clipboard.writeText(lastOutput).then(()=>showToast('복사되었습니다.'));
+});
 </script>
 </body>
 </html>
