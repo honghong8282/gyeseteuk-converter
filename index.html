@@ -516,7 +516,11 @@ document.getElementById('convertBatchBtn').addEventListener('click',async()=>{
       const addr=XLSX.utils.encode_cell({r:row._r,c:sCol});
       if(ws[addr]){ws[addr].v=cv;ws[addr].w=cv;}else ws[addr]={t:'s',v:cv,w:cv};
       b.className='badge done';b.textContent='완료 ✓';done++;
-    }catch{b.className='badge waiting';b.textContent='오류';}
+    }catch(err){
+      b.className='badge waiting';b.textContent='오류';
+      document.getElementById('progressStatus').textContent='⚠️ 오류: '+err.message;
+      console.error(err);
+    }
     document.getElementById('progressBar').style.width=Math.round(((i+1)/dataRows.length)*100)+'%';
     await new Promise(r=>setTimeout(r,300));
   }
