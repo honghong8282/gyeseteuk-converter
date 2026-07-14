@@ -6,262 +6,253 @@
 <title>자유학기 성적통지표 변환기</title>
 <script src="https://js.puter.com/v2/"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic+Coding&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
-
   :root{
-    --paper:#F2F4F8;
-    --card:#FFFFFF;
-    --ink:#1A2236;
-    --ink-soft:#4A5568;
-    --ink-faint:#9AA5B4;
-    --line:rgba(26,34,54,0.10);
-    --line-strong:rgba(26,34,54,0.20);
-    /* 배치 섹션 — 파란 계열 */
-    --blue:#1D4ED8;
-    --blue-light:#EFF6FF;
-    --blue-mid:#BFDBFE;
-    /* 단건 섹션 — 자주 계열 */
-    --purple:#6D28D9;
-    --purple-light:#F5F3FF;
-    --purple-mid:#DDD6FE;
+    --bg:       #F7F4FF;
+    --card:     #FFFFFF;
+    --ink:      #3D3558;
+    --ink-soft: #7B6FA0;
+    --ink-faint:#B3ACCC;
+    --line:     rgba(100,80,180,0.10);
+
+    /* 섹션 1 — 민트 */
+    --mint:     #3BBFA0;
+    --mint-bg:  #E6FAF6;
+    --mint-mid: #A7EFE0;
+    --mint-btn: #2EA88C;
+
+    /* 섹션 2 — 라벤더 핑크 */
+    --rose:     #C76BBA;
+    --rose-bg:  #FDF0FC;
+    --rose-mid: #F0C6EC;
+    --rose-btn: #B059A3;
+
     /* 성공 */
-    --green:#15803D;
-    --green-soft:#F0FDF4;
+    --green:    #3BAA72;
+    --green-bg: #E8FAF1;
   }
 
   *{box-sizing:border-box;margin:0;padding:0;}
   body{
-    background:var(--paper);
+    background:var(--bg);
     color:var(--ink);
-    font-family:'Noto Sans KR',sans-serif;
+    font-family:'Jua', 'Apple SD Gothic Neo', sans-serif;
     min-height:100vh;
   }
 
-  /* ── 상단 헤더 ── */
+  /* ── 헤더 ── */
   .site-header{
-    background:var(--ink);
-    color:#fff;
-    padding:40px 24px 44px;
+    background:linear-gradient(135deg,#D4CAFF 0%,#FBD0F4 50%,#C9EEFF 100%);
+    padding:48px 24px 52px;
     text-align:center;
     position:relative;
     overflow:hidden;
   }
   .site-header::before{
-    content:'';
-    position:absolute;inset:0;
-    background:radial-gradient(ellipse 80% 60% at 50% 120%, rgba(109,40,217,0.35), transparent);
-    pointer-events:none;
+    content:'✨';font-size:80px;opacity:0.12;
+    position:absolute;top:-10px;left:40px;transform:rotate(-15deg);
+  }
+  .site-header::after{
+    content:'🌸';font-size:80px;opacity:0.12;
+    position:absolute;bottom:-14px;right:40px;transform:rotate(10deg);
   }
   .site-header .eyebrow{
-    font-family:'JetBrains Mono',monospace;
-    font-size:11px;letter-spacing:0.18em;
-    color:rgba(255,255,255,0.45);
-    text-transform:uppercase;margin-bottom:12px;
+    font-size:12px;letter-spacing:0.14em;
+    color:#9080C8;text-transform:uppercase;margin-bottom:10px;
   }
   .site-header h1{
-    font-family:'Noto Serif KR',serif;
-    font-size:30px;font-weight:700;
-    letter-spacing:-0.02em;margin-bottom:10px;
-    position:relative;
+    font-size:30px;font-weight:400;
+    color:var(--ink);letter-spacing:-0.01em;margin-bottom:10px;
   }
   .site-header p{
-    font-size:13.5px;color:rgba(255,255,255,0.6);
-    line-height:1.7;position:relative;
+    font-size:14px;color:var(--ink-soft);line-height:1.8;
   }
 
-  .wrap{max-width:920px;margin:0 auto;padding:32px 20px 0;}
+  .wrap{max-width:900px;margin:0 auto;padding:28px 20px 0;}
 
   /* ── 섹션 공통 ── */
   .section{
-    border-radius:16px;
+    border-radius:20px;
     margin-bottom:20px;
     overflow:hidden;
-    box-shadow:0 2px 12px rgba(26,34,54,0.07);
+    box-shadow:0 4px 20px rgba(100,80,180,0.08);
   }
   .section-header{
-    display:flex;align-items:center;gap:12px;
+    display:flex;align-items:center;gap:14px;
     padding:18px 24px;
   }
   .section-num{
-    width:32px;height:32px;border-radius:50%;
+    width:36px;height:36px;border-radius:50%;
     display:flex;align-items:center;justify-content:center;
-    font-family:'JetBrains Mono',monospace;
-    font-size:14px;font-weight:700;flex-shrink:0;
+    font-size:16px;font-weight:400;flex-shrink:0;
+    background:rgba(255,255,255,0.3);color:#fff;
   }
-  .section-header h2{font-size:16px;font-weight:700;margin:0;}
-  .section-header p{font-size:12.5px;margin:0;opacity:0.75;}
-  .section-body{
-    background:var(--card);
-    padding:24px;
+  .section-header h2{font-size:17px;color:#fff;margin-bottom:2px;}
+  .section-header p{font-size:12.5px;color:rgba(255,255,255,0.8);}
+  .section-body{background:var(--card);padding:24px;}
+
+  /* 민트 헤더 */
+  .section.batch .section-header{
+    background:linear-gradient(120deg,#5DD6BE,#3BBFA0);
+  }
+  /* 라벤더 핑크 헤더 */
+  .section.single .section-header{
+    background:linear-gradient(120deg,#D98BD0,#C76BBA);
   }
 
-  /* 배치 섹션 색상 */
-  .section.batch .section-header{background:var(--blue);color:#fff;}
-  .section.batch .section-num{background:rgba(255,255,255,0.2);color:#fff;}
-
-  /* 단건 섹션 색상 */
-  .section.single .section-header{background:var(--purple);color:#fff;}
-  .section.single .section-num{background:rgba(255,255,255,0.2);color:#fff;}
-
-  /* ── 업로드 영역 ── */
+  /* ── 업로드 ── */
   .upload-zone{
-    border:2px dashed var(--blue-mid);
-    border-radius:12px;padding:32px 20px;
+    border:2.5px dashed var(--mint-mid);
+    border-radius:14px;padding:32px 20px;
     text-align:center;cursor:pointer;
-    background:var(--blue-light);
+    background:var(--mint-bg);
     transition:border-color .2s,background .2s;
   }
-  .upload-zone:hover,.upload-zone.drag-over{
-    border-color:var(--blue);background:#DBEAFE;
-  }
-  .upload-zone.has-file{
-    border-color:var(--green);background:var(--green-soft);border-style:solid;
-  }
+  .upload-zone:hover,.upload-zone.drag-over{border-color:var(--mint);background:#D0F5EE;}
+  .upload-zone.has-file{border-color:var(--green);background:var(--green-bg);border-style:solid;}
   .upload-zone input[type=file]{display:none;}
-  .upload-icon{font-size:32px;margin-bottom:8px;}
-  .upload-zone h3{font-size:15px;font-weight:700;margin-bottom:4px;color:var(--blue);}
+  .upload-icon{font-size:34px;margin-bottom:8px;}
+  .upload-zone h3{font-size:15px;color:var(--mint);margin-bottom:4px;}
   .upload-zone h3.done{color:var(--green);}
   .upload-zone p{font-size:12.5px;color:var(--ink-soft);}
 
-  /* ── 미리보기 테이블 ── */
+  /* ── 미리보기 ── */
   .preview-wrap{
-    border:1px solid var(--blue-mid);border-radius:10px;
+    border:1.5px solid var(--mint-mid);border-radius:12px;
     overflow:hidden;margin-top:16px;display:none;
   }
   .preview-head{
     display:flex;justify-content:space-between;align-items:center;
-    padding:10px 14px;background:var(--blue-light);
-    border-bottom:1px solid var(--blue-mid);
+    padding:10px 14px;background:var(--mint-bg);
+    border-bottom:1.5px solid var(--mint-mid);
   }
-  .preview-head span{font-size:12.5px;font-weight:700;color:var(--blue);}
+  .preview-head span{font-size:13px;color:var(--mint);}
   .preview-head em{font-size:12px;color:var(--ink-soft);font-style:normal;}
-  .table-scroll{overflow-x:auto;max-height:260px;overflow-y:auto;}
+  .table-scroll{overflow-x:auto;max-height:240px;overflow-y:auto;}
   table{width:100%;border-collapse:collapse;font-size:12.5px;}
   th{
-    background:#EFF6FF;padding:8px 12px;text-align:left;
-    font-weight:700;border-bottom:1px solid var(--blue-mid);
-    white-space:nowrap;color:var(--blue);position:sticky;top:0;
+    background:var(--mint-bg);padding:8px 12px;text-align:left;
+    font-weight:400;border-bottom:1.5px solid var(--mint-mid);
+    white-space:nowrap;color:var(--mint);position:sticky;top:0;
   }
-  td{padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.6;}
+  td{padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.7;}
   td.special{max-width:360px;}
   tr:last-child td{border-bottom:none;}
 
-  .badge{display:inline-block;font-size:11px;padding:2px 9px;border-radius:20px;font-weight:700;}
-  .badge.done{background:var(--green-soft);color:var(--green);}
+  .badge{display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;}
+  .badge.done{background:#D1FAE5;color:#065F46;}
   .badge.waiting{background:#F1F5F9;color:var(--ink-faint);}
-  .badge.processing{background:#FEF9C3;color:#854D0E;}
+  .badge.processing{background:#FEF3C7;color:#92400E;}
 
   /* ── 진행 바 ── */
   .progress-wrap{
-    margin-top:16px;background:var(--blue-light);
-    border:1px solid var(--blue-mid);
-    border-radius:10px;padding:16px 18px;display:none;
+    margin-top:16px;background:var(--mint-bg);
+    border:1.5px solid var(--mint-mid);
+    border-radius:12px;padding:16px 18px;display:none;
   }
   .progress-label{display:flex;justify-content:space-between;
-    font-size:13px;font-weight:700;margin-bottom:8px;color:var(--blue);}
-  .progress-bar-bg{background:var(--blue-mid);border-radius:99px;height:8px;overflow:hidden;}
-  .progress-bar{background:var(--blue);height:100%;border-radius:99px;width:0%;transition:width .3s;}
+    font-size:13px;color:var(--mint);margin-bottom:8px;}
+  .progress-bar-bg{background:var(--mint-mid);border-radius:99px;height:8px;overflow:hidden;}
+  .progress-bar{background:var(--mint);height:100%;border-radius:99px;width:0%;transition:width .3s;}
   .progress-status{font-size:12px;color:var(--ink-soft);margin-top:7px;}
 
-  /* ── 단건 변환 패널 ── */
+  /* ── 단건 패널 ── */
   .single-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-  @media(max-width:680px){.single-grid{grid-template-columns:1fr;}}
+  @media(max-width:660px){.single-grid{grid-template-columns:1fr;}}
 
   .panel{
-    border:1px solid var(--line-strong);border-radius:12px;
+    border:1.5px solid var(--line);border-radius:14px;
     display:flex;flex-direction:column;min-height:300px;
     position:relative;overflow:hidden;
   }
   .panel-head{
     display:flex;justify-content:space-between;align-items:center;
-    padding:11px 14px;border-bottom:1px solid var(--line);
+    padding:11px 14px;border-bottom:1.5px solid var(--line);
   }
-  .panel-head.left-head{background:var(--purple-light);}
-  .panel-head.right-head{background:#FFF7ED;}
-  .panel-title{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;color:var(--ink-soft);}
-  .dot{width:7px;height:7px;border-radius:50%;}
-  .dot.input{background:var(--purple);}
-  .dot.output{background:#EA580C;}
-  .charcount{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint);}
+  .panel-head.left-head{background:var(--mint-bg);}
+  .panel-head.right-head{background:var(--rose-bg);}
+  .panel-title{font-size:12.5px;display:flex;align-items:center;gap:6px;color:var(--ink-soft);}
+  .dot{width:8px;height:8px;border-radius:50%;}
+  .dot.input{background:var(--mint);}
+  .dot.output{background:var(--rose);}
+  .charcount{font-size:11px;color:var(--ink-faint);}
 
   textarea{
     flex:1;border:none;outline:none;resize:none;
-    padding:14px 16px;font-family:'Noto Sans KR',sans-serif;
-    font-size:14px;line-height:1.85;color:var(--ink);
-    background:repeating-linear-gradient(var(--card),var(--card) 30px,rgba(109,40,217,0.06) 31px);
-    background-attachment:local;
+    padding:14px 16px;font-family:'Jua','Apple SD Gothic Neo',sans-serif;
+    font-size:14px;line-height:1.9;color:var(--ink);
+    background:var(--card);
   }
   textarea::placeholder{color:var(--ink-faint);}
 
   .output-body{
-    flex:1;padding:14px 16px;font-size:14px;line-height:1.85;
-    overflow-y:auto;white-space:pre-wrap;
-    background:repeating-linear-gradient(var(--card),var(--card) 30px,rgba(234,88,12,0.06) 31px);
+    flex:1;padding:14px 16px;font-size:14px;line-height:1.9;
+    overflow-y:auto;white-space:pre-wrap;background:var(--card);
   }
   .output-empty{
     color:var(--ink-faint);font-size:13px;
     display:flex;align-items:center;justify-content:center;
-    height:100%;text-align:center;padding:20px;line-height:1.7;
-    background:transparent;
+    height:100%;text-align:center;padding:20px;line-height:1.8;
   }
   .stamp-mark{
     position:absolute;top:12px;right:12px;
-    width:48px;height:48px;border:2.5px solid #EA580C;
+    width:50px;height:50px;border:2.5px solid var(--rose);
     border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-family:'Noto Serif KR',serif;font-weight:700;font-size:10.5px;
-    color:#EA580C;transform:scale(0) rotate(-18deg);opacity:0;
+    font-size:11px;color:var(--rose);
+    transform:scale(0) rotate(-18deg);opacity:0;
     transition:transform .45s cubic-bezier(.34,1.56,.64,1),opacity .3s;
-    background:#FFF7ED;line-height:1.3;text-align:center;pointer-events:none;
+    background:var(--rose-bg);line-height:1.3;text-align:center;pointer-events:none;
   }
   .stamp-mark.show{transform:scale(1) rotate(-12deg);opacity:1;}
 
-  /* ── 공통 버튼 ── */
+  /* ── 버튼 ── */
   .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
   .actions.center{justify-content:center;}
 
-  button.btn-blue{
-    font-family:'Noto Sans KR',sans-serif;
-    background:var(--blue);color:#fff;border:none;
-    padding:11px 26px;border-radius:9px;font-size:14px;font-weight:600;
-    cursor:pointer;transition:background .15s,transform .1s;
-    display:flex;align-items:center;gap:7px;
-  }
-  button.btn-blue:hover{background:#1E40AF;}
-  button.btn-blue:active{transform:scale(0.98);}
-  button.btn-blue:disabled{background:#93C5FD;cursor:default;}
+  button{font-family:'Jua','Apple SD Gothic Neo',sans-serif;}
 
-  button.btn-purple{
-    font-family:'Noto Sans KR',sans-serif;
-    background:var(--purple);color:#fff;border:none;
-    padding:11px 26px;border-radius:9px;font-size:14px;font-weight:600;
+  button.btn-mint{
+    background:var(--mint-btn);color:#fff;border:none;
+    padding:11px 26px;border-radius:99px;font-size:14px;
     cursor:pointer;transition:background .15s,transform .1s;
     display:flex;align-items:center;gap:7px;
+    box-shadow:0 3px 10px rgba(59,191,160,0.35);
   }
-  button.btn-purple:hover{background:#5B21B6;}
-  button.btn-purple:active{transform:scale(0.98);}
-  button.btn-purple:disabled{background:#C4B5FD;cursor:default;}
+  button.btn-mint:hover{background:var(--mint);}
+  button.btn-mint:active{transform:scale(0.97);}
+  button.btn-mint:disabled{background:var(--mint-mid);cursor:default;box-shadow:none;}
+
+  button.btn-rose{
+    background:var(--rose-btn);color:#fff;border:none;
+    padding:11px 26px;border-radius:99px;font-size:14px;
+    cursor:pointer;transition:background .15s,transform .1s;
+    display:flex;align-items:center;gap:7px;
+    box-shadow:0 3px 10px rgba(199,107,186,0.35);
+  }
+  button.btn-rose:hover{background:var(--rose);}
+  button.btn-rose:active{transform:scale(0.97);}
+  button.btn-rose:disabled{background:var(--rose-mid);cursor:default;box-shadow:none;}
 
   button.btn-green{
-    font-family:'Noto Sans KR',sans-serif;
     background:var(--green);color:#fff;border:none;
-    padding:11px 26px;border-radius:9px;font-size:14px;font-weight:600;
+    padding:11px 26px;border-radius:99px;font-size:14px;
     cursor:pointer;transition:background .15s,transform .1s;
     display:flex;align-items:center;gap:7px;
+    box-shadow:0 3px 10px rgba(59,170,114,0.35);
   }
-  button.btn-green:hover{background:#166534;}
+  button.btn-green:hover{background:#2E9060;}
 
   button.ghost{
-    font-family:'Noto Sans KR',sans-serif;
     background:transparent;color:var(--ink-soft);
-    border:1px solid var(--line-strong);
-    padding:11px 18px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
+    border:1.5px solid rgba(100,80,180,0.20);
+    padding:11px 18px;border-radius:99px;font-size:13.5px;cursor:pointer;
   }
-  button.ghost:hover{background:rgba(26,34,54,0.04);}
+  button.ghost:hover{background:rgba(100,80,180,0.05);}
 
   .spinner{
     width:13px;height:13px;
-    border:2px solid rgba(255,255,255,0.35);
+    border:2px solid rgba(255,255,255,0.4);
     border-top-color:#fff;border-radius:50%;
     animation:spin .7s linear infinite;
   }
@@ -269,22 +260,20 @@
 
   /* ── 푸터 ── */
   footer{
-    margin-top:48px;padding:24px 0 36px;
-    text-align:center;border-top:1px solid var(--line);
+    margin-top:48px;padding:22px 0 36px;
+    text-align:center;border-top:1.5px solid var(--line);
   }
-  footer p{
-    font-family:'Noto Serif KR',serif;
-    font-size:13px;color:var(--ink-faint);letter-spacing:0.05em;
-  }
+  footer p{font-size:13px;color:var(--ink-faint);}
   footer strong{color:var(--ink-soft);}
 
   .toast{
     position:fixed;bottom:28px;left:50%;
     transform:translateX(-50%) translateY(20px);
     background:var(--ink);color:#fff;
-    padding:10px 20px;border-radius:9px;
+    padding:10px 22px;border-radius:99px;
     font-size:13px;opacity:0;pointer-events:none;
     transition:opacity .25s,transform .25s;z-index:999;
+    box-shadow:0 4px 16px rgba(61,53,88,0.3);
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
@@ -294,20 +283,18 @@
 <!-- 헤더 -->
 <div class="site-header">
   <div class="eyebrow">Maetan Middle School · Free Semester</div>
-  <h1>자유학기 성적통지표 변환기</h1>
-  <p>생활기록부 문체(~함. ~임.)를 통지표 문체(~합니다. ~입니다.)로 변환<br>띄어쓰기·오타 자동 수정</p>
+  <h1>🌿 자유학기 성적통지표 변환기 🌸</h1>
+  <p>생활기록부 문체(~함. ~임.)를 통지표 문체(~합니다. ~입니다.)로 변환해 드려요<br>띄어쓰기·오타도 자동으로 깔끔하게 수정됩니다</p>
 </div>
 
 <div class="wrap">
 
-  <!-- ══════════════════════════════════
-       섹션 1 : 엑셀 일괄 변환 (파란색)
-  ══════════════════════════════════ -->
+  <!-- 섹션 1: 민트 — 엑셀 일괄 변환 -->
   <div class="section batch">
     <div class="section-header">
       <div class="section-num">1</div>
       <div>
-        <h2>엑셀 일괄 변환</h2>
+        <h2>📄 엑셀 일괄 변환</h2>
         <p>나이스 통지표 양식 업로드 → 특기사항 전체 변환 → 다운로드</p>
       </div>
     </div>
@@ -315,14 +302,14 @@
 
       <div class="upload-zone" id="uploadZone">
         <input type="file" id="fileInput" accept=".xlsx,.xls">
-        <div class="upload-icon">📂</div>
-        <h3 id="uploadTitle">엑셀 파일을 여기에 드래그하거나 클릭하여 업로드</h3>
+        <div class="upload-icon">🗂️</div>
+        <h3 id="uploadTitle">엑셀 파일을 여기에 드래그하거나 클릭해서 올려주세요</h3>
         <p id="uploadDesc">.xlsx 형식 지원 · 나이스 자유학기 통지표 양식</p>
       </div>
 
       <div class="preview-wrap" id="previewWrap">
         <div class="preview-head">
-          <span>불러온 데이터</span>
+          <span>📋 불러온 데이터</span>
           <em id="rowCount"></em>
         </div>
         <div class="table-scroll">
@@ -335,7 +322,7 @@
 
       <div class="progress-wrap" id="progressWrap">
         <div class="progress-label">
-          <span>변환 진행 중</span>
+          <span>변환 진행 중 🔄</span>
           <span id="progressText">0 / 0</span>
         </div>
         <div class="progress-bar-bg"><div class="progress-bar" id="progressBar"></div></div>
@@ -343,25 +330,23 @@
       </div>
 
       <div class="actions">
-        <button class="btn-blue" id="convertBatchBtn" style="display:none" disabled>
-          <span id="batchIcon">→</span>
+        <button class="btn-mint" id="convertBatchBtn" style="display:none" disabled>
+          <span id="batchIcon">✨</span>
           <span id="batchLabel">변환 시작</span>
         </button>
-        <button class="btn-green" id="downloadBtn" style="display:none">⬇ 변환 파일 다운로드</button>
-        <button class="ghost" id="resetBtn" style="display:none">다시 업로드</button>
+        <button class="btn-green" id="downloadBtn" style="display:none">⬇️ 변환 파일 다운로드</button>
+        <button class="ghost" id="resetBtn" style="display:none">🔄 다시 업로드</button>
       </div>
 
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
-       섹션 2 : 단건 직접 변환 (보라색)
-  ══════════════════════════════════ -->
+  <!-- 섹션 2: 핑크/보라 — 단건 변환 -->
   <div class="section single">
     <div class="section-header">
       <div class="section-num">2</div>
       <div>
-        <h2>단건 직접 변환</h2>
+        <h2>✏️ 단건 직접 변환</h2>
         <p>원문을 직접 입력하고 한 건씩 변환</p>
       </div>
     </div>
@@ -382,32 +367,30 @@
           </div>
           <div class="stamp-mark" id="stamp">변환<br>완료</div>
           <div class="output-body" id="outputBody">
-            <div class="output-empty">왼쪽에 원문을 입력하고<br>'변환하기'를 누르세요.</div>
+            <div class="output-empty">왼쪽에 원문을 입력하고<br>'변환하기'를 눌러주세요 🌸</div>
           </div>
         </div>
       </div>
 
       <div class="actions center">
-        <button class="btn-purple" id="convertSingleBtn">
-          <span id="singleIcon">→</span>
+        <button class="btn-rose" id="convertSingleBtn">
+          <span id="singleIcon">✨</span>
           <span id="singleLabel">변환하기</span>
         </button>
-        <button class="ghost" id="copyBtn">복사하기</button>
+        <button class="ghost" id="copyBtn">📋 복사하기</button>
       </div>
 
     </div>
   </div>
 
-  <!-- 푸터 -->
   <footer>
-    <p>Design by <strong>홍홍</strong></p>
+    <p>Design by <strong>홍홍</strong> 🌿</p>
   </footer>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-/* ── 공통 유틸 ── */
 function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('show');
@@ -431,9 +414,8 @@ async function convertText(original){
   return r||original;
 }
 
-/* ── 섹션 1: 엑셀 일괄 ── */
+/* ── 섹션 1 ── */
 let wb=null,dataRows=[],hRow=-1,sCol=-1;
-
 const uploadZone=document.getElementById('uploadZone');
 const fileInput=document.getElementById('fileInput');
 
@@ -444,16 +426,16 @@ uploadZone.addEventListener('click',()=>fileInput.click());
 fileInput.addEventListener('change',e=>{if(e.target.files[0])handleFile(e.target.files[0]);});
 
 function handleFile(file){
-  if(!file.name.match(/\.(xlsx|xls)$/i)){showToast('xlsx 또는 xls 파일만 지원합니다.');return;}
+  if(!file.name.match(/\.(xlsx|xls)$/i)){showToast('xlsx 파일만 지원해요!');return;}
   const reader=new FileReader();
   reader.onload=e=>{
     try{wb=XLSX.read(e.target.result,{type:'array',cellStyles:true});parseSheet();}
-    catch(err){showToast('파일 읽기 실패: '+err.message);}
+    catch(err){showToast('파일을 읽을 수 없어요: '+err.message);}
   };
   reader.readAsArrayBuffer(file);
   const t=document.getElementById('uploadTitle');
-  t.textContent='✅ '+file.name; t.className='done';
-  document.getElementById('uploadDesc').textContent='파일이 로드되었습니다.';
+  t.textContent='✅ '+file.name;t.className='done';
+  document.getElementById('uploadDesc').textContent='파일이 로드되었어요!';
   uploadZone.classList.add('has-file');
 }
 
@@ -467,7 +449,7 @@ function parseSheet(){
       const cell=ws[XLSX.utils.encode_cell({r,c})];
       if(cell&&targets.includes(String(cell.v).trim())){hRow=r;sCol=c;break;}
     }
-  if(hRow===-1){showToast('"특기사항" 컬럼을 찾을 수 없습니다.');return;}
+  if(hRow===-1){showToast('"특기사항" 컬럼을 찾을 수 없어요!');return;}
   dataRows=[];
   for(let r=hRow+1;r<=range.e.r;r++){
     const cell=ws[XLSX.utils.encode_cell({r,c:sCol})];
@@ -481,24 +463,22 @@ function parseSheet(){
   dataRows.forEach((row,i)=>{
     const tr=document.createElement('tr');
     const t=row._text;
-    tr.innerHTML='<td style="white-space:nowrap;color:var(--blue);font-weight:700">'+(i+1)+'</td>'+
+    tr.innerHTML='<td style="white-space:nowrap;color:var(--mint)">'+(i+1)+'</td>'+
       '<td class="special">'+escHtml(t.length>100?t.slice(0,100)+'…':t)+'</td>'+
       '<td><span class="badge waiting" id="badge_'+i+'">대기</span></td>';
     pb.appendChild(tr);
   });
   document.getElementById('rowCount').textContent='총 '+dataRows.length+'건';
   document.getElementById('previewWrap').style.display='block';
-  const btn=document.getElementById('convertBatchBtn');
-  btn.style.display='flex';btn.disabled=false;
+  const btn=document.getElementById('convertBatchBtn');btn.style.display='flex';btn.disabled=false;
   document.getElementById('resetBtn').style.display='flex';
 }
 
 document.getElementById('convertBatchBtn').addEventListener('click',async()=>{
-  const btn=document.getElementById('convertBatchBtn');
-  btn.disabled=true;
+  const btn=document.getElementById('convertBatchBtn');btn.disabled=true;
   document.getElementById('batchIcon').outerHTML='<span class="spinner" id="batchIcon"></span>';
   document.getElementById('batchLabel').textContent='변환 중...';
-  const pw=document.getElementById('progressWrap');pw.style.display='block';
+  document.getElementById('progressWrap').style.display='block';
   const ws=wb.Sheets[wb.SheetNames[0]];
   let done=0;
   for(let i=0;i<dataRows.length;i++){
@@ -510,33 +490,33 @@ document.getElementById('convertBatchBtn').addEventListener('click',async()=>{
       const cv=await convertText(row._text);
       const addr=XLSX.utils.encode_cell({r:row._r,c:sCol});
       if(ws[addr]){ws[addr].v=cv;ws[addr].w=cv;}else ws[addr]={t:'s',v:cv,w:cv};
-      b.className='badge done';b.textContent='완료';done++;
-    }catch(err){b.className='badge waiting';b.textContent='오류';}
+      b.className='badge done';b.textContent='완료 ✓';done++;
+    }catch{b.className='badge waiting';b.textContent='오류';}
     document.getElementById('progressBar').style.width=Math.round(((i+1)/dataRows.length)*100)+'%';
     await new Promise(r=>setTimeout(r,300));
   }
-  document.getElementById('progressStatus').textContent='완료! 총 '+done+'/'+dataRows.length+'건 처리됨';
-  document.getElementById('batchIcon').outerHTML='<span id="batchIcon">✓</span>';
-  document.getElementById('batchLabel').textContent='변환 완료';
+  document.getElementById('progressStatus').textContent='🎉 완료! 총 '+done+'/'+dataRows.length+'건 처리됐어요';
+  document.getElementById('batchIcon').outerHTML='<span id="batchIcon">🎉</span>';
+  document.getElementById('batchLabel').textContent='변환 완료!';
   document.getElementById('downloadBtn').style.display='flex';
 });
 
 document.getElementById('downloadBtn').addEventListener('click',()=>{
-  XLSX.writeFile(wb,'자유학기_통지표_변환완료.xlsx');showToast('다운로드 시작!');
+  XLSX.writeFile(wb,'자유학기_통지표_변환완료.xlsx');showToast('다운로드 시작! 🎊');
 });
 
 document.getElementById('resetBtn').addEventListener('click',()=>{
   wb=null;dataRows=[];hRow=-1;sCol=-1;fileInput.value='';
   uploadZone.classList.remove('has-file');
   const t=document.getElementById('uploadTitle');
-  t.textContent='엑셀 파일을 여기에 드래그하거나 클릭하여 업로드';t.className='';
+  t.textContent='엑셀 파일을 여기에 드래그하거나 클릭해서 올려주세요';t.className='';
   document.getElementById('uploadDesc').textContent='.xlsx 형식 지원 · 나이스 자유학기 통지표 양식';
   ['previewWrap','progressWrap'].forEach(id=>document.getElementById(id).style.display='none');
   ['convertBatchBtn','downloadBtn','resetBtn'].forEach(id=>document.getElementById(id).style.display='none');
   document.getElementById('progressBar').style.width='0%';
 });
 
-/* ── 섹션 2: 단건 변환 ── */
+/* ── 섹션 2 ── */
 const inputText=document.getElementById('inputText');
 const outputBody=document.getElementById('outputBody');
 const stamp=document.getElementById('stamp');
@@ -546,28 +526,28 @@ inputText.addEventListener('input',()=>document.getElementById('inCount').textCo
 
 document.getElementById('convertSingleBtn').addEventListener('click',async()=>{
   const original=inputText.value.trim();
-  if(!original){outputBody.innerHTML='<div class="output-empty">원문을 먼저 입력해주세요.</div>';return;}
+  if(!original){outputBody.innerHTML='<div class="output-empty">원문을 먼저 입력해주세요 🌸</div>';return;}
   const btn=document.getElementById('convertSingleBtn');btn.disabled=true;
   document.getElementById('singleIcon').outerHTML='<span class="spinner" id="singleIcon"></span>';
   document.getElementById('singleLabel').textContent='변환 중...';
   stamp.classList.remove('show');
-  outputBody.innerHTML='<div class="output-empty">변환하는 중...</div>';
+  outputBody.innerHTML='<div class="output-empty">열심히 변환하는 중이에요... 🔄</div>';
   try{
     const result=await convertText(original);
     lastOutput=result;outputBody.textContent=result;
     document.getElementById('outCount').textContent=result.length+'자';
     stamp.classList.add('show');
   }catch(err){
-    outputBody.innerHTML='<div class="output-empty">오류: '+escHtml(err.message)+'</div>';
+    outputBody.innerHTML='<div class="output-empty">오류가 발생했어요 😢<br>'+escHtml(err.message)+'</div>';
   }
   btn.disabled=false;
-  document.getElementById('singleIcon').outerHTML='<span id="singleIcon">→</span>';
+  document.getElementById('singleIcon').outerHTML='<span id="singleIcon">✨</span>';
   document.getElementById('singleLabel').textContent='변환하기';
 });
 
 document.getElementById('copyBtn').addEventListener('click',()=>{
   if(!lastOutput)return;
-  navigator.clipboard.writeText(lastOutput).then(()=>showToast('복사되었습니다.'));
+  navigator.clipboard.writeText(lastOutput).then(()=>showToast('복사되었어요! 📋'));
 });
 </script>
 </body>
