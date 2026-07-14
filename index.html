@@ -403,7 +403,7 @@ async function convert(){
     const response = await puter.ai.chat([
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userMessage }
-    ], { model: 'gpt-4o-mini' });
+    ], { model: 'claude-sonnet-4-6' });
 
     let result = '';
     if(typeof response === 'string'){
