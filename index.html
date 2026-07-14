@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>자유학기 성적통지표 변환기</title>
-<script src="https://js.puter.com/v2/"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   @font-face {
@@ -419,19 +418,39 @@ function showToast(msg){
 function escHtml(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
-async function convertText(original){
-  const prompt=
-    '다음은 학교 생활기록부 과세특 문구입니다.\n'+
-    '두 가지만 수행하고 변환된 텍스트만 출력하세요. 설명 금지.\n\n'+
-    '1. 종결어미 변환: ~함. ~임. ~음. ~됨. ~였음. 등을 ~합니다. ~입니다. ~습니다. ~됩니다. ~였습니다. 로 변경\n'+
-    '2. 띄어쓰기 오류와 명백한 오타 수정\n\n'+
-    '[원문]\n'+original;
-  const resp=await puter.ai.chat(prompt);
-  let r='';
-  if(typeof resp==='string') r=resp.trim();
-  else if(resp&&resp.message){const c=resp.message.content;r=(typeof c==='string'?c:(c[0]&&c[0].text)||'').trim();}
-  else if(resp&&resp.content){const c=resp.content;r=(typeof c==='string'?c:(c[0]&&c[0].text)||'').trim();}
-  return r||original;
+function convertText(original){
+  let t = original;
+
+  // 1. 하다 계열: 함. → 합니다.
+  t = t.replace(/함\./g, '합니다.');
+
+  // 2. 이다 계열: 임. → 입니다. (보임. 아님. 포함)
+  t = t.replace(/임\./g, '입니다.');
+
+  // 3. 되다 계열: 됨. → 됩니다.
+  t = t.replace(/됨\./g, '됩니다.');
+
+  // 4. 았/었/였 + 음. → 았/었/였습니다.
+  t = t.replace(/(았|었|였)음\./g, '$1습니다.');
+
+  // 5. 있음. 없음. 않음. + 기타 음. 계열 → 습니다.
+  t = t.replace(/([가-힣])음\./g, '$1습니다.');
+
+  // 6. 기타 ㅁ받침 계열 (나타남. 뛰어남. 줌. 나눔. 등) → ㅂ니다.
+  t = t.replace(/([가-힣])\./g, (match, ch) => {
+    const code = ch.charCodeAt(0);
+    if (code < 0xAC00 || code > 0xD7A3) return match;
+    const finalIdx = (code - 0xAC00) % 28;
+    if (finalIdx === 16) { // ㅁ 받침
+      return String.fromCharCode(code + 1) + '니다.'; // ㅁ→ㅂ + 니다
+    }
+    return match;
+  });
+
+  // 7. 공백 정리 (연속 공백 → 단일 공백)
+  t = t.replace(/  +/g, ' ').trim();
+
+  return t;
 }
 
 /* ── 섹션 1 ── */
@@ -499,31 +518,28 @@ function parseSheet(){
   document.getElementById('resetBtn').style.display='flex';
 }
 
-document.getElementById('convertBatchBtn').addEventListener('click',async()=>{
+document.getElementById('convertBatchBtn').addEventListener('click',()=>{
   const btn=document.getElementById('convertBatchBtn');btn.disabled=true;
   document.getElementById('batchIcon').outerHTML='<span class="spinner" id="batchIcon"></span>';
   document.getElementById('batchLabel').textContent='변환 중...';
   document.getElementById('progressWrap').style.display='block';
   const ws=wb.Sheets[wb.SheetNames[0]];
   let done=0;
-  for(let i=0;i<dataRows.length;i++){
-    const row=dataRows[i];
-    const b=document.getElementById('badge_'+i);b.className='badge processing';b.textContent='변환 중';
-    document.getElementById('progressText').textContent=(i+1)+' / '+dataRows.length;
-    document.getElementById('progressStatus').textContent=(i+1)+'번째 항목 변환 중...';
+  dataRows.forEach((row,i)=>{
+    const b=document.getElementById('badge_'+i);
+    b.className='badge processing';b.textContent='변환 중';
     try{
-      const cv=await convertText(row._text);
+      const cv=convertText(row._text);
       const addr=XLSX.utils.encode_cell({r:row._r,c:sCol});
       if(ws[addr]){ws[addr].v=cv;ws[addr].w=cv;}else ws[addr]={t:'s',v:cv,w:cv};
       b.className='badge done';b.textContent='완료 ✓';done++;
     }catch(err){
       b.className='badge waiting';b.textContent='오류';
-      document.getElementById('progressStatus').textContent='⚠️ 오류: '+err.message;
       console.error(err);
     }
+    document.getElementById('progressText').textContent=(i+1)+' / '+dataRows.length;
     document.getElementById('progressBar').style.width=Math.round(((i+1)/dataRows.length)*100)+'%';
-    await new Promise(r=>setTimeout(r,300));
-  }
+  });
   document.getElementById('progressStatus').textContent='🎉 완료! 총 '+done+'/'+dataRows.length+'건 처리됐어요';
   document.getElementById('batchIcon').outerHTML='<span id="batchIcon">🎉</span>';
   document.getElementById('batchLabel').textContent='변환 완료!';
@@ -554,25 +570,15 @@ let lastOutput='';
 
 inputText.addEventListener('input',()=>document.getElementById('inCount').textContent=inputText.value.length+'자');
 
-document.getElementById('convertSingleBtn').addEventListener('click',async()=>{
+document.getElementById('convertSingleBtn').addEventListener('click',()=>{
   const original=inputText.value.trim();
   if(!original){outputBody.innerHTML='<div class="output-empty">원문을 먼저 입력해주세요 🌸</div>';return;}
-  const btn=document.getElementById('convertSingleBtn');btn.disabled=true;
-  document.getElementById('singleIcon').outerHTML='<span class="spinner" id="singleIcon"></span>';
-  document.getElementById('singleLabel').textContent='변환 중...';
   stamp.classList.remove('show');
-  outputBody.innerHTML='<div class="output-empty">열심히 변환하는 중이에요... 🔄</div>';
-  try{
-    const result=await convertText(original);
-    lastOutput=result;outputBody.textContent=result;
-    document.getElementById('outCount').textContent=result.length+'자';
-    stamp.classList.add('show');
-  }catch(err){
-    outputBody.innerHTML='<div class="output-empty">오류가 발생했어요 😢<br>'+escHtml(err.message)+'</div>';
-  }
-  btn.disabled=false;
-  document.getElementById('singleIcon').outerHTML='<span id="singleIcon">✨</span>';
-  document.getElementById('singleLabel').textContent='변환하기';
+  const result=convertText(original);
+  lastOutput=result;
+  outputBody.textContent=result;
+  document.getElementById('outCount').textContent=result.length+'자';
+  stamp.classList.add('show');
 });
 
 document.getElementById('copyBtn').addEventListener('click',()=>{
